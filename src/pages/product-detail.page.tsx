@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useProduct } from "@/cases/products/hooks/use-product";
-import { useCart } from "@/contexts/cart-conttext";
+import { useCart } from "@/contexts/cart-context";
 import { Button } from "@/components/ui/button";
 import { FormattedNumber, IntlProvider } from "react-intl";
 

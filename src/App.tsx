@@ -4,7 +4,7 @@ import { ProductListPage } from "./pages/product-list.page";
 import { ProductDetailPage } from "./pages/product-detail.page"; 
 import { CartPage } from "./pages/cart.page";
 import { Header } from "./components/layout/header";
-import { CartProvider } from "./contexts/cart-conttext";
+import { CartProvider } from "./contexts/cart-context";
 
 
 function App() {

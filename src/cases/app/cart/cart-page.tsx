@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/contexts/cart-conttext";
+import { useCart } from "@/contexts/cart-context";
 
 
 export default function CartPage() {

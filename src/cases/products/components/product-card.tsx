@@ -1,58 +1,69 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import type { ProductDTO } from "../dtos/product.dto";
 import { FormattedNumber, IntlProvider } from "react-intl";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-conttext";
-
+import { useCart } from "@/contexts/cart-context";
+import type { ProductDTO } from "../dtos/product.dto";
 
 type ProductCardProps = {
-      product: ProductDTO;
+  product: ProductDTO;
 };
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
 
-function handleAddToCart() {
+  const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
+  const [imagePath, setImagePath] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (product.photos && product.photos.length > 0) {
+      const fullURL = bucketBaseURL+product.photos[0].path;
+      console.log("Image URL:", fullURL);
+      setImagePath(fullURL);
+    }
+  }, [product]);
   
-  const rawId =
-    (product as any).id ?? (product as any)._id ?? (product as any).uuid;
-  const id = rawId != null ? String(rawId) : `${product.name}-${Date.now()}`;
-
-  const price = Number((product as any).price ?? 0);
-
-  addToCart({
-    id,
-    name: product.name,
-    price,
-    image: (product as any).image ?? "",
-    quantity: 1,
-  });
-}
+  function handleAddToCart() {
+    const id = product.id ?? `${product.name}-${Date.now()}`;
+    const price = Number(product.price ?? 0);
+    const imageURL = imagePath || (product.photos?.[0]?.path ? bucketBaseURL + product.photos[0].path : "");
+    addToCart({
+      id,
+      name: product.name,
+      price,
+      image: imageURL,
+      quantity: 1,
+    });
+  }
+  
+  
 
   return (
-    <Card>
-      <CardHeader>
-        { (product as any).image && (
+    <Card className="w-3xs flex flex-col justify-between">
+      <CardHeader className="py-0 h-[210px] flex items-center justify-center">
+        {imagePath ? (
           <img
-            src={(product as any).image}
-            alt={product.name}
-            className="w-full h-48 object-cover rounded-md"
+            className="cover w-full h-full object-cover rounded-md" src={imagePath}
           />
-        ) }
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+            Sem imagem
+          </div>
+        )}
       </CardHeader>
 
       <CardContent>
-        <h4>{product.name}</h4>
-
+        <h4 className="text-sm font-semibold mb-4 min-h-10">
+          {product.name}
+        </h4>
         <div className="w-full flex flex-col">
-          <p>
+          <p className="text-sm font-light line-through mb-1">
             <IntlProvider locale="pt-BR">
               <FormattedNumber
-                value={product.price}
+                value={product.price * 1.15}
                 style="currency"
                 currency="BRL"
-              />{" "}
-              Kg
+              />
             </IntlProvider>
           </p>
 
@@ -62,8 +73,8 @@ function handleAddToCart() {
                 value={product.price}
                 style="currency"
                 currency="BRL"
-              />{" "}
-              em 10x de{" "}
+              />
+              {" "}em 10x de{" "}
               <FormattedNumber
                 value={product.price / 10}
                 style="currency"
@@ -80,8 +91,8 @@ function handleAddToCart() {
                 style="currency"
                 currency="BRL"
               />
-            </IntlProvider>{" "}
-            no PIX
+            </IntlProvider>
+            {" "}no PIX
           </p>
         </div>
 

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-conttext";
+import { useCart } from "@/contexts/cart-context";
 
 export function CartPage() {
   const { cart, removeFromCart } = useCart();

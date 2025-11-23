@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User } from "lucide-react";
 import { useSearch } from "@/contexts/search-context";
-import { useCart } from "@/contexts/cart-conttext";
+import { useCart } from "@/contexts/cart-context";
 
 export function Header() {
   
