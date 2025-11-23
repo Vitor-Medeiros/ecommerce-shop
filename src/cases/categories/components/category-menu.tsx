@@ -28,20 +28,20 @@ export function CategoryMenu() {
   useEffect(() => {
     if (categories) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setVisibleItems(categories.slice(0, 5));
-      setHiddenItems(categories.slice(5));
+      setVisibleItems(categories.slice(0, 6));
+      setHiddenItems(categories.slice(6));
     }
   }, [categories]);
 
   return (
     <nav  className="w-full py-4 flex items-center justify-between">
-      <div className="flex flex-col">
+       <div className="flex flex-col pl-16">
         <h5 className="font-medium text-2x1 text-gray-900">Nossos  Produtos</h5>
         <p className="text-sm text-gray-500">Novos produtos todos os dias</p>
       </div>
       <div className="flex items-center justify-end gap-2">
         <Button variant="outline">
-          Todos 
+          Todos
         </Button>
         {visibleItems.map((category) => (
           <Button 
