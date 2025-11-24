@@ -1,76 +1,93 @@
-import { Button } from "@/components/ui/button"
-import { useCategories } from "../hooks/use-category"
+import { Button } from "@/components/ui/button";
+import { useCategories } from "../hooks/use-category";
 import { useEffect, useState } from "react";
 import type { CategoryDTO } from "../dtos/category.dto";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function CategoryMenu() {
-
-  const {data: categories, isLoading} = useCategories();
+  const { data: categories, isLoading } = useCategories();
+  const navigate = useNavigate();
 
   const [visibleItems, setVisibleItems] = useState<CategoryDTO[]>([]);
   const [hiddenItems, setHiddenItems] = useState<CategoryDTO[]>([]);
 
   useEffect(() => {
     if (categories) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisibleItems(categories.slice(0, 6));
       setHiddenItems(categories.slice(6));
     }
   }, [categories]);
 
+  if (isLoading) {
+    return (
+      <nav className="w-full py-4 flex items-center justify-between">
+        <p className="pl-16 text-sm text-gray-500">Carregando categorias...</p>
+      </nav>
+    );
+  }
+
   return (
-    <nav  className="w-full py-4 flex items-center justify-between">
-       <div className="flex flex-col pl-16">
-        <h5 className="font-medium text-2x1 text-gray-900">Nossos  Produtos</h5>
-        <p className="text-sm text-gray-500">Novos produtos todos os dias</p>
+    <nav className="w-full py-4 flex items-center justify-between bg-white shadow-sm px-10">
+      
+      {/* SLOGAN NA BARRA */}
+      <div className="flex flex-col">
+        <h5 className="font-semibold text-xl text-gray-900">
+          Seu esporte começa aqui
+        </h5>
+        <p className="text-sm text-gray-500">
+          Equipando sua paixão pelo esporte
+        </p>
       </div>
-      <div className="flex items-center justify-end gap-2">
-        <Button variant="outline">
+
+      {/* CATEGORIAS */}
+      <div className="flex items-center gap-6">
+        <button
+          onClick={() => navigate("/")}
+          className="text-gray-700 hover:text-blue-600 transition"
+        >
           Todos
-        </Button>
+        </button>
+
         {visibleItems.map((category) => (
-          <Button 
+          <button
             key={category.id}
-            variant="outline"
+            onClick={() => navigate(`/category/${category.id}`)}
+            className="text-gray-700 hover:text-blue-600 transition"
           >
             {category.name}
-          </Button>
+          </button>
         ))}
+
         {hiddenItems.length > 0 && (
           <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              Mais 
-              <ChevronDown/>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {hiddenItems.map((category) => (
-               <DropdownMenuItem
-               key={category.id}
-               >
-                {category.name}
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-1">
+                Mais
+                <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent>
+              {hiddenItems.map((category) => (
+                <DropdownMenuItem
+                  key={category.id}
+                  onClick={() => navigate(`/category/${category.id}`)}
+                >
+                  {category.name}
                 </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
+
     </nav>
   );
 }
