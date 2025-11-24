@@ -110,28 +110,29 @@ function handleAddToCart() {
           <span className="text-gray-700">no Pix</span>
         </p>
 
-        <p className="font-light text-gray-700">
-          <IntlProvider locale="pt-BR">
-            <p>
-              ou{" "}
-              <FormattedNumber
-                value={product.price}
-                style="currency"
-                currency="BRL"
-              />{" "}
-              em 10x
-            </p>
-            <p>
-              de{" "}
-              <FormattedNumber
-                value={product.price / 10}
-                style="currency"
-                currency="BRL"
-              />{" "}
-              sem juros
-            </p>
-          </IntlProvider>
-        </p>
+        <div className="font-light mb-4 text-gray-700">
+    <IntlProvider locale="pt-BR">
+    <p>
+      ou{" "}
+      <FormattedNumber
+        value={product.price}
+        style="currency"
+        currency="BRL"
+      />{" "}
+      em 10x
+    </p>
+
+    <p>
+      de{" "}
+      <FormattedNumber
+        value={product.price / 10}
+        style="currency"
+        currency="BRL"
+      />{" "}
+      sem juros
+    </p>
+  </IntlProvider>
+</div>
 
         <Button
           onClick={handleAddToCart}
