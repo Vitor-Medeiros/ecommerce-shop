@@ -40,7 +40,7 @@ export function Header() {
             )}
           </Link>
 
-          <Link to="/login">
+          <Link to="/signIn">
             <Button variant="outline" size="icon">
               <User className="h-5 w-5" />
             </Button>

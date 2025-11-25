@@ -19,7 +19,6 @@ export function ProductCard({ product }: ProductCardProps) {
   useEffect(() => {
     if (product.photos && product.photos.length > 0) {
       const fullURL = bucketBaseURL+product.photos[0].path;
-      console.log("Image URL:", fullURL);
       setImagePath(fullURL);
     }
   }, [product]);
@@ -40,7 +39,6 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
   <Card className="w-3xs flex flex-col justify-between rounded-xl shadow hover:shadow-lg transition-shadow bg-white">
     
-    {/* IMAGEM */}
     <CardHeader className="p-0 h-[220px] flex items-center justify-center overflow-hidden rounded-t-xl">
       <Link to={`/product/${product.id}`}>
         {imagePath ? (
@@ -56,7 +54,6 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
     </CardHeader>
 
-    {/* CONTEÚDO */}
     <CardContent className="p-4 flex flex-col gap-3">
       
       <Link to={`/product/${product.id}`}>
@@ -67,7 +64,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex flex-col gap-1">
 
-        {/* PREÇO ANTIGO */}
         <p className="text-sm text-gray-500 line-through">
           <IntlProvider locale="pt-BR">
             <FormattedNumber
@@ -78,7 +74,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </IntlProvider>
         </p>
 
-        {/* PARCELADO */}
         <p className="text-sm text-gray-700">
           <IntlProvider locale="pt-BR">
             <FormattedNumber
@@ -95,7 +90,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </IntlProvider>
         </p>
 
-        {/* PREÇO À VISTA */}
         <p className="text-green-600 font-semibold text-[15px]">
           <IntlProvider locale="pt-BR">
             <FormattedNumber
@@ -108,7 +102,6 @@ export function ProductCard({ product }: ProductCardProps) {
         </p>
       </div>
 
-      {/* BOTÃO */}
       <Button 
         onClick={handleAddToCart} 
         className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow"

@@ -5,6 +5,8 @@ import { Header } from "./components/layout/header";
 import { ProductListPage } from "./pages/product-list.page";
 import { ProductDetailPage } from "./pages/product-detail.page";
 import { CartPage } from "./pages/cart.page";
+import { SignUpPage } from "./pages/signup-page";
+import { SignInPage } from "./pages/signin-page";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
                 <Route path="/category/:id" element={<ProductListPage />} />
                 <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/cart" element={<CartPage />} />
+                <Route path="/signin" element={<SignInPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
               </Routes>
             </div>
           </main>
