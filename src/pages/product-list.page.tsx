@@ -1,7 +1,7 @@
 import { CategoryMenu } from "@/cases/categories/components/category-menu";
 import { ProductCard } from "@/cases/products/components/product-card";
 import { useProducts } from "@/cases/products/hooks/use-product";
-import { useSearch } from "@/contexts/search-context";
+import { useSearch } from "@/cases/search/contexts/search-context";
 import { useParams } from "react-router-dom";
 
 export function ProductListPage() {

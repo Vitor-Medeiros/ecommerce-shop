@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FormattedNumber, IntlProvider } from "react-intl";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/cart-context";
 import type { ProductDTO } from "../dtos/product.dto";
 import { Link } from "react-router-dom";
+import { useCart } from "@/cases/cart/hooks/use-cart";
 
 type ProductCardProps = {
   product: ProductDTO;
 };
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addProduct } = useCart();
 
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
   const [imagePath, setImagePath] = useState<string | null>(null);
@@ -23,17 +23,8 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   }, [product]);
   
-  function handleAddToCart() {
-    const id = product.id ?? `${product.name}-${Date.now()}`;
-    const price = Number(product.price ?? 0);
-    const imageURL = imagePath || (product.photos?.[0]?.path ? bucketBaseURL + product.photos[0].path : "");
-    addToCart({
-      id,
-      name: product.name,
-      price,
-      image: imageURL,
-      quantity: 1,
-    });
+   function handleAddToCart() {
+   addProduct(product)
   }
   
   return (

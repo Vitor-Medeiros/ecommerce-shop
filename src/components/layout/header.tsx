@@ -1,20 +1,23 @@
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User } from "lucide-react";
-import { useSearch } from "@/contexts/search-context";
-import { useCart } from "@/contexts/cart-context";
+import { ShoppingBasket, ShoppingCart, User } from "lucide-react";
+import { useSearch } from "@/cases/search/contexts/search-context";
+import { useCart } from "@/cases/cart/hooks/use-cart";
+import { Badge } from "../ui/badge";
+
 
 export function Header() {
   
-  const { cartCount } = useCart();
+  const { cart } = useCart();
   const { query, setQuery } = useSearch();
 
   return (
     <header className="w-full border-b bg-white">
       <div className="container mx-auto flex items-center justify-between py-4 gap-4">
-        <Link to="/" className="text-2xl font-bold">
-          MaterShop Sports
+        <Link to="/" >
+          <ShoppingBasket className="text-blue-500"/>
+          <h1 className="text-2xl font-bold">MaterShop Sports</h1>
         </Link>
 
         <div className="flex-1 px-10">
@@ -29,15 +32,19 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <Link to="/cart" className="relative">
-            <Button variant="outline" size="icon">
+            <Button 
+            variant="outline" 
+            size="icon"
+            className="hover:text-blue-500 relative"  >
               <ShoppingCart className="h-5 w-5" />
-            </Button>
+              {cart.items.length > 0 && (
+                <Badge
+                  className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 font-mono tabular-nums bg-blue-500 text-white">
+                    {cart.items.length}
+                </Badge>
+              )}
 
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1">
-                {cartCount}
-              </span>
-            )}
+            </Button>
           </Link>
 
           <Link to="/signIn">

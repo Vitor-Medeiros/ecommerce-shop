@@ -3,7 +3,8 @@ import type { ProductDTO } from "../dtos/product.dto";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormattedNumber, IntlProvider } from "react-intl";
-import { useCart } from "@/contexts/cart-context";
+import { useCart } from "@/cases/cart/hooks/use-cart";
+
 
 type ProductDetailProps = {
   product: ProductDTO;
@@ -11,6 +12,9 @@ type ProductDetailProps = {
 export function ProductDetail({
   product
 }: ProductDetailProps) {
+
+  const {addProduct} = useCart();
+
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
   const [selectedPhoto, setSelectedPhoto] = useState<number>(0);
 
@@ -20,17 +24,10 @@ export function ProductDetail({
     ? `${bucketBaseURL}${mainPhoto.path}`
     : `https://placehold.co/300x300?text=Sem+Imagem&font-roboto`
 
-  const cart = useCart();
+  
 
   function handleAddToCart() {
-    if (!product || !product.id) return;
-    cart.addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: (product as any).image ?? "",
-      quantity: 1,
-    });
+   addProduct(product)
   }
 
 
