@@ -1,196 +1,190 @@
-
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCart } from "../hooks/use-cart"
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { useCart } from "../hooks/use-cart";
+import { ItemGroup } from "@/components/ui/item";
 import { FormattedNumber, IntlProvider } from "react-intl";
 
 import { Button } from "@/components/ui/button";
 import { MapPin, Trash2 } from "lucide-react";
-import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
-import { TooltipContent } from "@radix-ui/react-tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { QuantityInput } from "@/components/ui/quantity-input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { useState } from "react";
 
 export function CartContent() {
-    const { cart, removeProductCart } = useCart();
+  const { cart, removeProductCart, updateProductQuantity } = useCart();
+  const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
 
-    const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
+  const [cep, setCep] = useState("");
+  const [shippingCost, setShippingCost] = useState(0);
 
+  const productsTotal = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const totalCard = productsTotal + shippingCost;
+  const totalPix = totalCard * 0.9;
 
-    return (
+  function calcularFrete() {
+    if (cep.length !== 8) {
+      alert("Digite um CEP válido.");
+      return;
+    }
+    setShippingCost(cep.startsWith("85") ? 15 : 25);
+  }
 
-        <div className="flex gap-4">
-            <Card className="w-full mt-8">
-                <CardContent>
-                    <ItemGroup className="gap-4">
-                        {cart.items.map((item, index) => (
-                            <Item key={index} variant="muted" role="listitem" asChild>
+  return (
+    <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2 bg-white shadow-md rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-zinc-900">Produtos Adicionad</CardTitle>
+        </CardHeader>
 
-                                <div>
-                                    <ItemMedia variant="image">
-                                        {item.product.photos?.length && (
-                                            <img
-                                                src={`${bucketBaseURL}${item.product.photos[0].path}`}
-                                                className="w-8 h-8 object-cover grayscale" />
-                                        )}
-                                    </ItemMedia>
-                                    <ItemContent>
-                                        <ItemTitle className="line-clamp-1">
-                                            {item.product.name}
-                                        </ItemTitle>
-                                        <ItemDescription>
-                                            {item.product.brand?.name}
-                                        </ItemDescription>
-                                    </ItemContent>
+        <CardContent className="space-y-4">
+          <ItemGroup className="flex flex-col gap-4">
+            {cart.items.map((item) => {
+              const subtotal = item.product.price * item.quantity;
 
-                                    <ItemContent className="flex-none text-cover">
-                                        <ItemTitle>
-                                            <div className="flex flex-row gap-4">
+              return (
+                <div
+                  key={item.product.id}
+                  className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl shadow-sm"
+                >
+                  <div className="flex items-start gap-4 flex-1">
+                    {item.product?.photos?.[0] && (
+                      <img
+                        src={`${bucketBaseURL}${item.product.photos[0].path}`}
+                        className="w-20 h-20 object-cover rounded-lg shadow"
+                        alt={item.product.name}
+                      />
+                    )}
 
-                                                <div>
-                                                    <QuantityInput initialQuantity={item.quantity}/>
-                                                </div>
+                    <div className="flex flex-col">
+                      <span className="text-base font-semibold line-clamp-1">
+                        {item.product.name}
+                      </span>
+                      {item.product.brand && (
+                        <span className="text-xs text-muted-foreground">{item.product.brand.name}</span>
+                      )}
+                      <span className="mt-2 text-sm font-semibold text-blue-600">
+                        <IntlProvider locale="pt-BR">
+                          <FormattedNumber value={item.product.price} style="currency" currency="BRL" />
+                        </IntlProvider>{" "}
+                        <span className="text-xs text-gray-500">unidade</span>
+                      </span>
+                      <span className="mt-1 text-sm font-bold text-gray-700">
+                        <IntlProvider locale="pt-BR">
+                          <FormattedNumber value={subtotal} style="currency" currency="BRL" />
+                        </IntlProvider>{" "}
+                        <span className="text-xs text-muted-foreground">(subtotal)</span>
+                      </span>
+                    </div>
+                  </div>
 
-                                                <div className=" flex flex-col">
-                                                    <p className="font-semibold flex justify-end gap-1.5">
-                                                        <IntlProvider locale="pt-BR">
-                                                            <FormattedNumber value={item.product.price * 0.9} style="currency" currency="BRL" /> no PIX
-                                                        </IntlProvider>
-                                                    </p>
-                                                    <p className="font-semibold flex justify-end gap-1.5">em 10x de </p>
-                                                    <p className="font-semibold flex justify-end gap-1.5">
-                                                        <IntlProvider locale="pt-BR">
+                  <div className="flex items-center gap-3">
+                    <QuantityInput
+                      initialQuantity={item.quantity}
+                      onChange={(value) => updateProductQuantity(item.product.id!, value)}
+                    />
 
-                                                            <FormattedNumber value={item.product.price / 10} style="currency" currency="BRL" />
-                                                        </IntlProvider> no Cartão
-                                                    </p>
-                                                </div>
-                                                <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() => removeProductCart(item.product.id!)}
-                                                    >
-                                                        <Trash2 className="text-gray-700" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent> Excluir</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        </ItemTitle>
-                                    </ItemContent>
-
-                                </div>
-
-                            </Item>
-                        ))}
-                    </ItemGroup>
-                </CardContent>
-            </Card >
-
-            <div className="flex flex-col w-md mt-8 gap-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm">Frete para CEP</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <InputGroup>
-                            <InputGroupInput placeholder="CEP"/>
-                            <InputGroupAddon>
-                                <MapPin className= "text-blue-500"/>
-                            </InputGroupAddon>
-                            <InputGroupAddon align="inline-end">
-                                <Button variant="ghost" size="sm"
-                                    className="-mr-1 hover:bg-transparent hover:text-blue-500"
-                                    >
-                                        Calcular
-                                    </Button>
-                                </InputGroupAddon>
-                        </InputGroup>
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-sm">Total Pedido:</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-2">
-                        <ItemGroup>
-                            <Item variant="muted">
-                                <ItemContent>
-                                <ItemTitle>Frete:</ItemTitle>
-                                </ItemContent>
-                                <ItemContent>
-                                <ItemTitle>
-                                    <div className="flex flex-col">
-                                        <p className="text-xs font-semibold flex justify-end gap-1.5">
-                                            <IntlProvider locale="pt-BR">
-                                                <FormattedNumber value={0} style="currency" currency="BRL"/>
-                                            </IntlProvider>
-                                        </p>
-                                    </div>
-                                </ItemTitle>
-                                </ItemContent>
-                            </Item>
-                        </ItemGroup>
-
-                        <ItemGroup>
-                            <Item variant="muted">
-                                <ItemContent>
-                                <ItemTitle>Produtos:</ItemTitle>
-                                </ItemContent>
-                                <ItemContent>
-                                <ItemTitle>
-                                    <div className="flex flex-col">
-                                        <p className="text-xs font-semibold flex justify-end gap-1.5">
-                                            <IntlProvider locale="pt-BR">
-                                                <FormattedNumber value={500} style="currency" currency="BRL"/>
-                                            </IntlProvider>
-                                        </p>
-                                    </div>
-                                </ItemTitle>
-                                </ItemContent>
-                            </Item>
-                        </ItemGroup>
-
-                        <ItemGroup>
-                            <Item variant="muted">
-                                <ItemContent>
-                                <ItemTitle>Total:</ItemTitle>
-                                </ItemContent>
-                                <ItemContent>
-                                <ItemTitle>
-                                    <div className="flex flex-col">
-                                        <p className="text-xs font-semibold flex justify-end gap-1.5">
-                                            <IntlProvider locale="pt-BR">
-                                                <FormattedNumber value={500*0.9} style="currency" currency="BRL"/> no PIX
-                                            </IntlProvider>
-                                        </p>
-                                        <p className="text-xs font-light flex justify-end gap-1.5">
-                                            <IntlProvider locale="pt-BR">
-                                                <FormattedNumber value={500} style="currency" currency="BRL"/> no Cartão
-                                            </IntlProvider>
-                                        </p>
-                                    </div>
-                                </ItemTitle>
-                                </ItemContent>
-                            </Item>
-                        </ItemGroup>
-                    </CardContent>
-                    <CardFooter>
-                        <Button
-                            className="w-full bg-blue-500 hover:bg-blue-700 text-white"
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => removeProductCart(item.product.id!)}
+                          className="p-2 rounded-md hover:bg-red-100 transition"
                         >
-                            Finalizar o Pedido
-                        </Button>
-                    </CardFooter>
-                </Card>
+                          <Trash2 className="text-red-600" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Remover item</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              );
+            })}
+          </ItemGroup>
+        </CardContent>
+      </Card>
 
+      <div className="flex flex-col gap-6">
+        <Card className="bg-white shadow-md rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Calcular Frete</CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            <InputGroup>
+              <InputGroupInput
+                placeholder="Digite seu CEP"
+                value={cep}
+                onChange={(e) => setCep(e.target.value.replace(/\D/g, ""))}
+              />
+              <InputGroupAddon>
+                <MapPin className="text-blue-500" />
+              </InputGroupAddon>
+              <InputGroupAddon align="inline-end">
+                <Button variant="ghost" size="sm" className="hover:text-blue-600" onClick={calcularFrete}>
+                  Calcular
+                </Button>
+              </InputGroupAddon>
+            </InputGroup>
+
+            {shippingCost > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Frete calculado para o CEP <span className="font-semibold">{cep}</span>
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white shadow-md rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Resumo do Pedido</CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>Frete:</span>
+              <strong>
+                <IntlProvider locale="pt-BR">
+                  <FormattedNumber value={shippingCost} style="currency" currency="BRL" />
+                </IntlProvider>
+              </strong>
             </div>
 
-        </div >
+            <div className="flex justify-between text-sm">
+              <span>Produtos:</span>
+              <strong>
+                <IntlProvider locale="pt-BR">
+                  <FormattedNumber value={productsTotal} style="currency" currency="BRL" />
+                </IntlProvider>
+              </strong>
+            </div>
 
-    )
+            <div className="pt-2 border-t">
+              <div className="flex justify-between text-sm font-semibold">
+                <span>Total no PIX:</span>
+                <span className="text-green-600">
+                  <IntlProvider locale="pt-BR">
+                    <FormattedNumber value={totalPix} style="currency" currency="BRL" />
+                  </IntlProvider>
+                </span>
+              </div>
 
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>Total no Cartão:</span>
+                <span>
+                  <IntlProvider locale="pt-BR">
+                    <FormattedNumber value={totalCard} style="currency" currency="BRL" />
+                  </IntlProvider>
+                </span>
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-sm font-semibold">
+              Finalizar Pedido
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
 }

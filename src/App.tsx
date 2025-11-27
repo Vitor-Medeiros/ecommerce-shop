@@ -5,13 +5,13 @@ import { ProductListPage } from "./pages/product-list.page";
 import { ProductDetailPage } from "./pages/product-detail.page";
 import { SignUpPage } from "./pages/signup-page";
 import { SignInPage } from "./pages/signin-page";
-import { CartPage } from "./pages/cart.page";
+import { CartPage } from "./pages/cart.page"
 
 function App() {
   return (
       
       <SearchProvider>
-        <Header />
+          <Header />
           <main className="bg-zinc-50 min-h-screen">
             <div className="container mx-auto flex flex-col p-4 gap-4">
               <Routes>

@@ -1,86 +1,102 @@
 import type { ProductDTO } from "@/cases/products/dtos/product.dto";
 import { createContext, useEffect, useState, type ReactNode } from "react";
 
-export interface CartItem{
+export interface CartItem {
     product: ProductDTO;
     quantity: number;
 }
 
-export interface Cart{
+export interface Cart {
     items: CartItem[];
 }
 
-type CartContextType ={
-    cart : Cart;
-    addProduct: (product: ProductDTO, quantity?: number)=> void;
-    removeProductCart: (productId: string)=> void;
-}
+type CartContextType = {
+    cart: Cart;
+    addProduct: (product: ProductDTO, quantity?: number) => void;
+    removeProductCart: (productId: string) => void;
+    updateProductQuantity: (productId: string, quantity: number) => void;
+    clearCart: () => void;
+};
 
-export const CartContext = createContext<CartContextType | undefined>(undefined)
+export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 type CartContextProviderProps = {
-    children: ReactNode
-}
+    children: ReactNode;
+};
 
-export function CartContextProvider({
-    children
-}: CartContextProviderProps){
+export function CartContextProvider({ children }: CartContextProviderProps) {
 
-    const [cart, setCart] = useState<Cart>({items: []});
+    const [cart, setCart] = useState<Cart>({ items: [] });
 
-    
+    useEffect(() => {
+        const storageCart = localStorage.getItem("cart");
 
-    useEffect(()=>{
-        const storageCart = localStorage.getItem('cart');
-
-        if (storageCart){
-            try{
-                setCart(JSON.parse(storageCart))
-            }catch{
-                setCart({items:[]});
+        if (storageCart) {
+            try {
+                setCart(JSON.parse(storageCart));
+            } catch {
+                setCart({ items: [] });
             }
         }
-    },[]);
+    }, []);
 
-    useEffect(()=>{
-        localStorage.setItem('cart',JSON.stringify(cart))
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);
 
-    function addProduct(product: ProductDTO,quantity:number = 1){
-        
-        setCart((prevCart: Cart)=>{
-            const existingItem = prevCart.items.find((item) => item.product.id ===product.id);
+    function addProduct(product: ProductDTO, quantity: number = 1) {
+        setCart((prevCart: Cart) => {
+            const existingItem = prevCart.items.find(
+                (item) => item.product.id === product.id
+            );
 
-            let updatedItems : CartItem[];
+            let updatedItems: CartItem[];
 
-            if (existingItem){
+            if (existingItem) {
                 updatedItems = prevCart.items.map((item) =>
                     item.product.id === product.id
-                    ?{...item, quantity:item.quantity + quantity}
-                    : item
-                )
+                        ? { ...item, quantity: item.quantity + quantity }
+                        : item
+                );
             } else {
-                updatedItems = [...prevCart.items, {product, quantity}]
+                updatedItems = [...prevCart.items, { product, quantity }];
             }
 
-            return {items: updatedItems}
-
-        })
-
+            return { items: updatedItems };
+        });
     }
 
-    function removeProductCart (productId: string){
-        setCart((prevCart)=> (
-        {
-            items: prevCart.items.filter((item)=> item.product.id !=productId)
-        }
-        ))
+    function updateProductQuantity(productId: string, quantity: number) {
+        setCart((prevCart) => ({
+            items: prevCart.items.map((item) =>
+                item.product.id === productId
+                    ? { ...item, quantity }
+                    : item
+            ),
+        }));
     }
 
-    return(
-        <CartContext.Provider value={{cart,addProduct, removeProductCart}}>
+    function removeProductCart(productId: string) {
+        setCart((prevCart) => ({
+            items: prevCart.items.filter((item) => item.product.id !== productId),
+        }));
+    }
+
+    function clearCart() {
+        setCart({ items: [] });
+    }
+
+    return (
+        <CartContext.Provider
+            value={{
+                cart,
+                addProduct,
+                removeProductCart,
+                updateProductQuantity,
+                clearCart,
+            }}
+        >
             {children}
         </CartContext.Provider>
-    )
-
+    );
 }

@@ -1,13 +1,14 @@
-import { CategoryMenu } from "@/cases/categories/components/category-menu";
-import { ProductCard } from "@/cases/products/components/product-card";
-import { useProducts } from "@/cases/products/hooks/use-product";
-import { useSearch } from "@/cases/search/contexts/search-context";
-import { useParams } from "react-router-dom";
+import { CategoryMenu } from "@/cases/categories/components/category-menu"
+import { ProductCard } from "@/cases/products/components/product-card"
+import { useProducts } from "@/cases/products/hooks/use-product"
+import { useSearch } from "@/cases/search/contexts/search-context"
+import { Sidebar, SidebarContent, SidebarProvider } from "@/components/ui/sidebar"
+import { useParams } from "react-router-dom"
 
 export function ProductListPage() {
-  const { data: products, isLoading } = useProducts();
-  const { query } = useSearch();
-  const { id: categoryId } = useParams<{ id: string }>();
+  const { data: products, isLoading } = useProducts()
+  const { query } = useSearch()
+  const { id: categoryId } = useParams<{ id: string }>()
 
   if (isLoading) {
     return (
@@ -16,7 +17,6 @@ export function ProductListPage() {
       </div>
     );
   }
-
   const filteredProducts = products
     ?.filter((p) =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -26,21 +26,37 @@ export function ProductListPage() {
 
   return (
     <>
-      <CategoryMenu />
+      <div className="pt-16">
+        <SidebarProvider>
+          <div className="flex min-h-screen">
+            <Sidebar className="w-64  bg-white shadow-md mt-16">
+              <SidebarContent className="flex flex-col p-4 gap-2">
+                <p className="font-semibold text-gray-700">Menu</p>
+                <CategoryMenu />
+              </SidebarContent>
+            </Sidebar>
+          </div>
 
-      <section className="container mx-auto py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {filteredProducts && filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          ) : (
-            <p className="col-span-full text-center text-gray-600">
-              Nenhum produto encontrado.
-            </p>
-          )}
-        </div>
-      </section>
+          <section className="container mx-auto py-10">
+            <div
+              className="grid gap-10"
+              style={{
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              }}
+            >
+              {filteredProducts && filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+              ) : (
+                <p className="col-span-full text-center text-gray-600">
+                  Nenhum produto encontrado.
+                </p>
+              )}
+            </div>
+          </section>
+        </SidebarProvider>
+      </div>
     </>
-  );
+  )
 }
