@@ -9,8 +9,6 @@ export function OrdersPage() {
   return (
     <div className="min-h-screen bg-zinc-50">
       <div className="max-w-6xl mx-auto px-6 py-10">
-
-        {/* Breadcrumb */}
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>

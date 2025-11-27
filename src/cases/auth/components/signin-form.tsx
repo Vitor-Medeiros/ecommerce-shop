@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSignIn } from "../hooks/use-signin";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AlertDescription } from "@/components/ui/alert";
@@ -28,9 +28,10 @@ const formSchema = z.object({
 export type LoginSchema = z.infer<typeof formSchema>;
 
 export function SignInForm() {
+
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const redirectURL = searchParams.get("redirect") || "/";
+  const location = useLocation();
+  const redirectURL = (location.state as any)?.from?.pathname || "/";
 
   const { mutate, isPending, error } = useSignIn();
 
@@ -44,7 +45,7 @@ export function SignInForm() {
 
   function onSubmit(values: LoginSchema) {
     mutate(values, {
-      onSuccess: () => navigate(redirectURL)
+      onSuccess: () => navigate(redirectURL, { replace: true })
     });
   }
 
