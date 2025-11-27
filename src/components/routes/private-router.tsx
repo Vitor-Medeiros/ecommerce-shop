@@ -7,12 +7,18 @@ interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to={`/signin?redirect=${location.pathname}`} replace />
+;
   }
 
   return <>{children}</>;
 }
+

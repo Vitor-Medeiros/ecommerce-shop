@@ -5,6 +5,7 @@ interface AuthContextType {
   user: UserResponse | null;
   isAuthenticated: boolean;
   token: string | null;
+  loading: boolean;
 
   signIn: (data: AuthResponse) => void;
   signOut: () => void;
@@ -19,13 +20,16 @@ type AuthContextProvideProps = {
 export function AuthContextProvide({ children }: AuthContextProvideProps) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [token, setToken] = useState<string | null>(null);
-
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     const userStoraged = localStorage.getItem('user');
     const tokenStoraged = localStorage.getItem('token');
+    
 
     if (userStoraged) setUser(JSON.parse(userStoraged));
     if (tokenStoraged) setToken(tokenStoraged);
+    setLoading(false);
   }, []);
 
   function signIn(data: AuthResponse) {
@@ -51,7 +55,8 @@ export function AuthContextProvide({ children }: AuthContextProvideProps) {
         token,
         isAuthenticated: !!token,
         signIn,
-        signOut
+        signOut,
+        loading
       }}
     >
       {children}

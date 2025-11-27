@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/use-cart";
-import { useOrders } from "@/cases/order/hooks/use-order";
-
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ItemGroup } from "@/components/ui/item";
@@ -11,16 +9,21 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group";
 import { MapPin, Trash2 } from "lucide-react";
 import { FormattedNumber, IntlProvider } from "react-intl";
+import { useAuth } from "@/cases/auth/hooks/use-auth";
+import type { CustomerDTO } from "@/cases/customers/dtos/customer.dto";
+import type { OrderDTO, OrderItemDTO } from "@/cases/order/dtos/order.dto";
+import { useCreateOrder } from "@/cases/order/hooks/use-order";
 
 export function CartContent() {
   const { cart, removeProductCart, updateProductQuantity, clearCart } = useCart();
-  const { createOrder } = useOrders();
   const navigate = useNavigate();
-
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
+  const createOrder = useCreateOrder();
+  
 
   const [cep, setCep] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
+  const [cepError, setCepError] = useState("");
 
   const productsTotal = cart.items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -31,40 +34,70 @@ export function CartContent() {
 
   function calcularFrete() {
     if (cep.length !== 8) {
-      alert("Digite um CEP válido.");
-      return;
-    }
-    setShippingCost(cep.startsWith("85") ? 15 : 25);
-  }
-
-  function handleFinalizeOrder() {
-    if (cart.items.length === 0) {
-      alert("Seu carrinho está vazio!");
-      return;
-    }
-    if (!cep || shippingCost === 0) {
-      alert("Por favor, calcule o frete antes de finalizar o pedido.");
+      setCepError("Digite um CEP válido.");
+      setShippingCost(0);
       return;
     }
 
-    createOrder(cart.items, totalCard, shippingCost);
-    clearCart();
-    navigate("/orders");
+    const frete = cep.startsWith("85") ? 15 : 25;
+    setShippingCost(frete);
+    setCepError("");
   }
+const { user } = useAuth();
+
+
+async function handleCreateOrder() {
+  if (!user) {
+    navigate("/signin?redirect=/cart");
+    return;
+  }
+
+  if (cep.length !== 8) {
+    setCepError("Digite um CEP válido antes de finalizar o pedido.");
+    return;
+  }
+
+  const frete = cep.startsWith("85") ? 15 : 500;
+  setShippingCost(frete);
+  setCepError("");
+
+  const customer: CustomerDTO = {
+    id: user.id,
+    name: user.name,
+  };
+
+  const items: OrderItemDTO[] = cart.items.map((item) => ({
+    product: item.product,
+    quantity: item.quantity,
+    value: item.product.price,
+  }));
+
+  const order: OrderDTO = {
+    customer,
+    status: "NEW",
+    items,
+    shippingCost: frete,
+  };
+
+  createOrder.mutate(order, {
+    onSuccess: () => {
+      clearCart();
+      navigate("/orders");
+    },
+  });
+}
+
 
   return (
     <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Lista de produtos */}
       <Card className="lg:col-span-2 bg-white shadow-md rounded-2xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-zinc-900">Produtos Adicionados</CardTitle>
         </CardHeader>
-
         <CardContent className="space-y-4">
           <ItemGroup className="flex flex-col gap-4">
             {cart.items.map((item) => {
               const subtotal = item.product.price * item.quantity;
-
               return (
                 <div
                   key={item.product.id}
@@ -78,7 +111,6 @@ export function CartContent() {
                         alt={item.product.name}
                       />
                     )}
-
                     <div className="flex flex-col">
                       <span className="text-base font-semibold line-clamp-1">{item.product.name}</span>
                       {item.product.brand && (
@@ -98,13 +130,11 @@ export function CartContent() {
                       </span>
                     </div>
                   </div>
-
                   <div className="flex items-center gap-3">
                     <QuantityInput
                       initialQuantity={item.quantity}
                       onChange={(value) => updateProductQuantity(item.product.id!, value)}
                     />
-
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -124,13 +154,11 @@ export function CartContent() {
         </CardContent>
       </Card>
 
-      {/* Frete e resumo do pedido */}
       <div className="flex flex-col gap-6">
         <Card className="bg-white shadow-md rounded-2xl">
           <CardHeader>
             <CardTitle className="text-sm font-medium">Calcular Frete</CardTitle>
           </CardHeader>
-
           <CardContent className="space-y-3">
             <InputGroup>
               <InputGroupInput
@@ -148,19 +176,19 @@ export function CartContent() {
               </InputGroupAddon>
             </InputGroup>
 
+            {cepError && <p className="text-xs text-red-500 mt-1">{cepError}</p>}
+
             {shippingCost > 0 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
                 Frete calculado para o CEP <span className="font-semibold">{cep}</span>
               </p>
             )}
           </CardContent>
         </Card>
-
         <Card className="bg-white shadow-md rounded-2xl">
           <CardHeader>
             <CardTitle className="text-sm font-medium">Resumo do Pedido</CardTitle>
           </CardHeader>
-
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm">
               <span>Frete:</span>
@@ -170,7 +198,6 @@ export function CartContent() {
                 </IntlProvider>
               </strong>
             </div>
-
             <div className="flex justify-between text-sm">
               <span>Produtos:</span>
               <strong>
@@ -179,7 +206,6 @@ export function CartContent() {
                 </IntlProvider>
               </strong>
             </div>
-
             <div className="pt-2 border-t">
               <div className="flex justify-between text-sm font-semibold">
                 <span>Total no PIX:</span>
@@ -189,7 +215,6 @@ export function CartContent() {
                   </IntlProvider>
                 </span>
               </div>
-
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>Total no Cartão:</span>
                 <span>
@@ -200,11 +225,10 @@ export function CartContent() {
               </div>
             </div>
           </CardContent>
-
           <CardFooter>
             <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-sm font-semibold"
-              onClick={handleFinalizeOrder}
+              onClick={handleCreateOrder}
             >
               Finalizar Pedido
             </Button>

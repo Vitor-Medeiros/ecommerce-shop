@@ -10,46 +10,35 @@ import { ProductDetailPage } from "./pages/product-detail.page";
 import { SignUpPage } from "./pages/signup-page";
 import { SignInPage } from "./pages/signin-page";
 import { CartPage } from "./pages/cart.page";
-import { OrdersPage } from "./pages/order.page";
+
 import { PrivateRoute } from "./components/routes/private-router";
+import { AuthContextProvide } from "./cases/auth/contexts/auth.context";
+import { OrdersPage } from "./pages/orders.page";
+
 
 
 
 function App() {
   return (
-    <SearchProvider>
-      <CartContextProvider>
-        <OrderProvider>
-          <Layout>
+<AuthContextProvide>
+  <SearchProvider>
+    <CartContextProvider>
+      <OrderProvider>
+        <Layout>
             <Routes>
-
               <Route path="/" element={<ProductListPage />} />
               <Route path="/signin" element={<SignInPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/category/:id" element={<ProductListPage />} />
               <Route path="/product/:id" element={<ProductDetailPage />} />
-
-              <Route
-                path="/cart"
-                element={
-                  <PrivateRoute>
-                    <CartPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <PrivateRoute>
-                    <OrdersPage />
-                  </PrivateRoute>
-                }
-              />
+              <Route path="/cart" element={ <CartPage /> } />
+              <Route path="/orders" element={ <PrivateRoute> <OrdersPage /> </PrivateRoute>}/>
             </Routes>
           </Layout>
         </OrderProvider>
       </CartContextProvider>
     </SearchProvider>
+    </AuthContextProvide>
   );
 }
 

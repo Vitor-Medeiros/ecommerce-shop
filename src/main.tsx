@@ -9,13 +9,13 @@ import { CartContextProvider } from './cases/cart/contexts/cart-context.tsx'
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
- <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <CartContextProvider>
-        <AuthContextProvide>
+  <AuthContextProvide>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <CartContextProvider>
           <App />
-        </AuthContextProvide>
-      </CartContextProvider>
-    </QueryClientProvider>
-  </BrowserRouter>,
+        </CartContextProvider>
+      </QueryClientProvider>
+    </BrowserRouter>,
+  </AuthContextProvide>
 )
