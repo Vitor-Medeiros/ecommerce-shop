@@ -1,23 +1,31 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/use-cart";
+import { useOrders } from "@/cases/order/hooks/use-order";
+
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ItemGroup } from "@/components/ui/item";
+import { QuantityInput } from "@/components/ui/quantity-input";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group";
+import { MapPin, Trash2 } from "lucide-react";
 import { FormattedNumber, IntlProvider } from "react-intl";
 
-import { Button } from "@/components/ui/button";
-import { MapPin, Trash2 } from "lucide-react";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { QuantityInput } from "@/components/ui/quantity-input";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { useState } from "react";
-
 export function CartContent() {
-  const { cart, removeProductCart, updateProductQuantity } = useCart();
+  const { cart, removeProductCart, updateProductQuantity, clearCart } = useCart();
+  const { createOrder } = useOrders();
+  const navigate = useNavigate();
+
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
 
   const [cep, setCep] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
 
-  const productsTotal = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const productsTotal = cart.items.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  );
   const totalCard = productsTotal + shippingCost;
   const totalPix = totalCard * 0.9;
 
@@ -29,11 +37,27 @@ export function CartContent() {
     setShippingCost(cep.startsWith("85") ? 15 : 25);
   }
 
+  function handleFinalizeOrder() {
+    if (cart.items.length === 0) {
+      alert("Seu carrinho está vazio!");
+      return;
+    }
+    if (!cep || shippingCost === 0) {
+      alert("Por favor, calcule o frete antes de finalizar o pedido.");
+      return;
+    }
+
+    createOrder(cart.items, totalCard, shippingCost);
+    clearCart();
+    navigate("/orders");
+  }
+
   return (
     <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Lista de produtos */}
       <Card className="lg:col-span-2 bg-white shadow-md rounded-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-zinc-900">Produtos Adicionad</CardTitle>
+          <CardTitle className="text-2xl font-bold text-zinc-900">Produtos Adicionados</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -56,9 +80,7 @@ export function CartContent() {
                     )}
 
                     <div className="flex flex-col">
-                      <span className="text-base font-semibold line-clamp-1">
-                        {item.product.name}
-                      </span>
+                      <span className="text-base font-semibold line-clamp-1">{item.product.name}</span>
                       {item.product.brand && (
                         <span className="text-xs text-muted-foreground">{item.product.brand.name}</span>
                       )}
@@ -102,6 +124,7 @@ export function CartContent() {
         </CardContent>
       </Card>
 
+      {/* Frete e resumo do pedido */}
       <div className="flex flex-col gap-6">
         <Card className="bg-white shadow-md rounded-2xl">
           <CardHeader>
@@ -179,7 +202,10 @@ export function CartContent() {
           </CardContent>
 
           <CardFooter>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-sm font-semibold">
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 text-sm font-semibold"
+              onClick={handleFinalizeOrder}
+            >
               Finalizar Pedido
             </Button>
           </CardFooter>

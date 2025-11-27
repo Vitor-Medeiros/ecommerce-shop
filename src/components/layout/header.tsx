@@ -1,14 +1,25 @@
-import { Link } from "react-router-dom";
+"use client";
+
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ShoppingBasket, ShoppingCart, User } from "lucide-react";
 import { useSearch } from "@/cases/search/contexts/search-context";
 import { useCart } from "@/cases/cart/hooks/use-cart";
 import { Badge } from "../ui/badge";
+import { useAuth } from "@/cases/auth/hooks/use-auth";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const { cart } = useCart();
   const { query, setQuery } = useSearch();
+  const { user, isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-0 w-full border-b bg-white shadow-sm z-50 h-16">
@@ -47,15 +58,46 @@ export function Header() {
             </Button>
           </Link>
 
-          <Link to="/signIn">
-            <Button
-              variant="outline"
-              size="icon"
-              className="hover:bg-blue-50 hover:text-blue-600 transition"
-            >
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <div className="px-4 py-2 text-zinc-700 font-medium border-b">
+                  Olá, {user?.name}
+                </div>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/orders")}>
+                  Meus Pedidos
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  Favoritos
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    signOut();
+                    navigate("/");
+                  }}
+                >
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link to="/signIn">
+                <Button variant="outline" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button onClick={() => navigate("/signup")}>Cadastrar</Button>
+            </>
+          )}
         </div>
       </div>
     </header>

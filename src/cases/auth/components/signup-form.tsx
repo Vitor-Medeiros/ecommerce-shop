@@ -68,10 +68,8 @@ export function SignUpForm() {
               </AlertDescription>
             </div>
           )}
-
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* NAME */}
               <FormField
                 control={form.control}
                 name="name"
@@ -89,8 +87,6 @@ export function SignUpForm() {
                   </FormItem>
                 )}
               />
-
-              {/* EMAIL */}
               <FormField
                 control={form.control}
                 name="email"
@@ -108,8 +104,6 @@ export function SignUpForm() {
                   </FormItem>
                 )}
               />
-
-              {/* PASSWORD */}
               <FormField
                 control={form.control}
                 name="password"
@@ -123,7 +117,6 @@ export function SignUpForm() {
                   </FormItem>
                 )}
               />
-
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -135,7 +128,7 @@ export function SignUpForm() {
           </Form>
 
           <Separator className="my-6" />
-
+          
           <div className="text-center">
             <h2 className="text-lg font-semibold text-zinc-800 mb-1">
               Já possui conta?

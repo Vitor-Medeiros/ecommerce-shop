@@ -29,12 +29,12 @@ export function ProductListPage() {
       <div className="pt-16">
         <SidebarProvider>
           <div className="flex min-h-screen">
-            <Sidebar className="w-64  bg-white shadow-md mt-16">
-              <SidebarContent className="flex flex-col p-4 gap-2">
-                <p className="font-semibold text-gray-700">Menu</p>
-                <CategoryMenu />
+            <Sidebar className="hidden md:block w-64 fixed top-16 left-0 bottom-0 bg-white shadow-md z-10">
+              <SidebarContent className="flex flex-col p-4 gap-2 h-full overflow-y-auto">
+                  <CategoryMenu />
               </SidebarContent>
             </Sidebar>
+
           </div>
 
           <section className="container mx-auto py-10">
