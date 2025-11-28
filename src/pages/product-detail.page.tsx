@@ -1,5 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useProduct } from "@/cases/products/hooks/use-product";
+import { useAuth } from "@/cases/auth/hooks/use-auth";
+import { useOrders } from "@/cases/order/hooks/use-order";
 
 import {
   Breadcrumb,
@@ -9,21 +11,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+
 import { ProductDetail } from "@/cases/products/components/product-detail";
+
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  
-  if (!id) {
-    return <div className="p-6">Produto inválido.</div>;
-  }
-  const { data: product, isLoading, error } = useProduct(id);
-  if (isLoading) {
-    return <div className="p-6">Carregando produto...</div>;
-  }
+  const { user } = useAuth();
 
-  if (error || !product) {
-    return <div className="p-6">Produto não encontrado.</div>;
-  }
+  const { data: product, isLoading, error } = useProduct(id ?? "");
+  useOrders(user?.id);
+
+  if (!id) return <div className="p-6">Produto inválido.</div>;
+  if (isLoading) return <div className="p-6">Carregando produto...</div>;
+  if (error || !product) return <div className="p-6">Produto não encontrado.</div>;
 
   return (
     <div className="p-4">
@@ -48,10 +48,8 @@ export function ProductDetailPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      
-      <div >
-        <ProductDetail product={product} />
-      </div>
+
+      <ProductDetail product={product} />
     </div>
   );
 }

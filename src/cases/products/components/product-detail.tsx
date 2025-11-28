@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import type { ProductDTO } from "../dtos/product.dto";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormattedNumber, IntlProvider } from "react-intl";
 import { useCart } from "@/cases/cart/hooks/use-cart";
 import { FavoriteButton } from "@/cases/favorites/components/favorite-button";
+import { StarRating } from "@/cases/ratings/components/star-rating";
+import { useAuth } from "@/cases/auth/hooks/use-auth";
+import { useOrders } from "@/cases/order/hooks/use-order";
 
 type ProductDetailProps = {
   product: ProductDTO;
@@ -12,14 +15,33 @@ type ProductDetailProps = {
 
 export function ProductDetail({ product }: ProductDetailProps) {
   const { addProduct } = useCart();
-  const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
-  const [selectedPhoto, setSelectedPhoto] = useState<number>(0);
+  const { user } = useAuth();
+  const { data: orders } = useOrders(user?.id);
 
+  const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
   const photos = product.photos || [];
-  const mainPhoto = photos[selectedPhoto];
-  const mainImagePhoto = mainPhoto
-    ? `${bucketBaseURL}${mainPhoto.path}`
-    : `https://placehold.co/300x300?text=Sem+Imagem&font-roboto`;
+  const mainPhoto = photos[0] ?? null;
+  const mainImagePhoto = mainPhoto ? `${bucketBaseURL}${mainPhoto.path}` : `https://placehold.co/300x300?text=Sem+Imagem`;
+
+  // derive purchased ids from orders (preferred)
+  const purchasedIdsFromOrders = useMemo(() => {
+    if (!orders) return [];
+    return orders.flatMap(o => o.items.map(i => String(i.product.id)));
+  }, [orders]);
+
+  // fallback to localStorage (kept for backwards compat)
+  const purchasedIdsFromStorage = (() => {
+    try {
+      if (!user) return [];
+      const key = `purchasedProducts_${user.id}`;
+      return JSON.parse(localStorage.getItem(key) || "[]").map(String);
+    } catch {
+      return [];
+    }
+  })();
+
+  // final check: if either source contains the id -> allow rating
+  const hasPurchased = purchasedIdsFromOrders.includes(String(product.id)) || purchasedIdsFromStorage.includes(String(product.id));
 
   function handleAddToCart() {
     addProduct(product);
@@ -28,35 +50,20 @@ export function ProductDetail({ product }: ProductDetailProps) {
   return (
     <div className="flex flex-col gap-8 max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-3xl md:text-4xl font-semibold">{product.name}</h1>
-
       <div className="flex flex-col md:flex-row gap-12">
         <div className="flex flex-col items-center gap-4 w-full md:w-1/2">
           <div className="w-full h-[420px] bg-white rounded-xl shadow-md flex items-center justify-center p-4">
-            <img
-              src={mainImagePhoto}
-              className="max-h-full max-w-full object-contain"
-              alt={product.name}
-            />
+            <img src={mainImagePhoto} className="max-h-full max-w-full object-contain" alt={product.name} />
           </div>
-
           {photos.length > 1 && (
             <ul className="flex gap-3 overflow-x-auto pb-2">
               {photos.map((photo, index) => (
                 <li key={photo.id}>
                   <button
-                    className={cn(
-                      "w-20 h-20 rounded-lg border shadow-sm overflow-hidden hover:ring-2 hover:ring-blue-400",
-                      index === selectedPhoto
-                        ? "border-blue-500 ring-2 ring-blue-400"
-                        : "border-gray-300"
-                    )}
-                    onClick={() => setSelectedPhoto(index)}
+                    className={cn("w-20 h-20 rounded-lg border shadow-sm overflow-hidden hover:ring-2 hover:ring-blue-400", index === 0 ? "border-blue-500 ring-2 ring-blue-400" : "border-gray-300")}
+                    onClick={() => {}}
                   >
-                    <img
-                      src={`${bucketBaseURL}${photo.path}`}
-                      className="w-full h-full object-contain"
-                      alt={`Foto ${index + 1}`}
-                    />
+                    <img src={`${bucketBaseURL}${photo.path}`} className="w-full h-full object-contain" alt="" />
                   </button>
                 </li>
               ))}
@@ -65,11 +72,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         </div>
 
         <div className="flex flex-col gap-6 w-full md:w-1/2 bg-white rounded-xl shadow-lg p-6">
-
-          <p className="text-sm text-gray-500 font-medium">
-            {product.brand?.name ?? "Marca não informada"}
-          </p>
-
+          <p className="text-sm text-gray-500 font-medium">{product.brand?.name ?? "Marca não informada"}</p>
 
           <p className="text-gray-500 line-through text-lg">
             <IntlProvider locale="pt-BR">
@@ -94,25 +97,22 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           <div className="font-light mb-4 text-gray-700">
             <IntlProvider locale="pt-BR">
-              <p>
-                ou <FormattedNumber value={product.price!} style="currency" currency="BRL" /> em 10x
-              </p>
-              <p>
-                de <FormattedNumber value={product.price! / 10} style="currency" currency="BRL" /> sem juros
-              </p>
+              <p>ou <FormattedNumber value={product.price!} style="currency" currency="BRL" /> em 10x</p>
+              <p>de <FormattedNumber value={product.price! / 10} style="currency" currency="BRL" /> sem juros</p>
             </IntlProvider>
           </div>
-          
-          <FavoriteButton product={product} className="self-end" />
 
-          <Button
-            onClick={handleAddToCart}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 rounded-xl shadow-md"
-          >
-            Adicionar ao Carrinho
-          </Button>
+          <div className="flex items-center">
+            <StarRating productId={String(product.id)} canRate={hasPurchased} />
+            <FavoriteButton product={product} className="ml-auto" />
+          </div>
+
+          {!hasPurchased && <p className="text-sm text-gray-400">Você só pode avaliar após a compra</p>}
+
+          <Button onClick={handleAddToCart} className="bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 rounded-xl shadow-md">Adicionar ao Carrinho</Button>
         </div>
       </div>
+
       <div className="bg-white shadow-md rounded-xl p-6 mt-4">
         <h2 className="text-xl font-semibold mb-2">Descrição</h2>
         <p className="text-gray-700 leading-relaxed">{product.description}</p>

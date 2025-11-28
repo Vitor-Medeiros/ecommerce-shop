@@ -5,7 +5,8 @@ import { IntlProvider, FormattedNumber } from "react-intl";
 import { OrderStatusBadge } from "./order-status-badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import { ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/cases/auth/hooks/use-auth";
 
 type OrderContentProps = {
   order: OrderDTO;
@@ -13,6 +14,28 @@ type OrderContentProps = {
 
 export function OrderContent({ order }: OrderContentProps) {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth(); 
+
+  useEffect(() => {
+    if (!user) return;
+
+    const isDelivered =
+      order.status === "delivered" ||
+      order.status === "completed" ||
+      order.status === "finished";
+
+    if (!isDelivered) return;
+
+    const key = `purchasedProducts_${user.id}`;
+
+    const existing = JSON.parse(localStorage.getItem(key) || "[]");
+
+    const productIds = order.items.map((item) => String(item.product.id));
+
+    const merged = Array.from(new Set([...existing, ...productIds]));
+
+    localStorage.setItem(key, JSON.stringify(merged));
+  }, [order.status, user]);
 
   return (
     <Card className="bg-white shadow-md rounded-2xl p-4 space-y-4">
@@ -49,7 +72,7 @@ export function OrderContent({ order }: OrderContentProps) {
                 <span className="font-bold text-gray-700">
                   <IntlProvider locale="pt-BR">
                     <FormattedNumber
-                      value={item.product.price * item.quantity}
+                      value={item.product.price! * item.quantity}
                       style="currency"
                       currency="BRL"
                     />
@@ -64,7 +87,7 @@ export function OrderContent({ order }: OrderContentProps) {
             <IntlProvider locale="pt-BR">
               <FormattedNumber
                 value={order.items.reduce(
-                  (acc, item) => acc + item.product.price * item.quantity,
+                  (acc, item) => acc + item.product.price! * item.quantity,
                   0
                 )}
                 style="currency"

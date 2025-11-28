@@ -1,4 +1,4 @@
-
+import { useEffect } from "react";
 import { useAuth } from "@/cases/auth/hooks/use-auth";
 import { OrderContent } from "@/cases/order/components/order-content";
 import { useOrders } from "@/cases/order/hooks/use-order";
@@ -16,6 +16,16 @@ export function OrdersPage() {
   const { user } = useAuth();
   const { data: orders, isLoading } = useOrders(user?.id);
 
+  useEffect(() => {
+    if (!isLoading && orders) {
+      const purchasedProductIds = orders.flatMap(order =>
+        order.items.map(item => item.product.id)
+      );
+      const uniqueIds = [...new Set(purchasedProductIds)];
+      localStorage.setItem("purchasedProducts", JSON.stringify(uniqueIds));
+    }
+  }, [isLoading, orders]);
+  
   return (
     <div className="min-h-screen bg-zinc-50">
       <div className="max-w-6xl mx-auto px-6 py-10">

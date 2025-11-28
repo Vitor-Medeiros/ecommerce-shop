@@ -16,6 +16,7 @@ import { AuthContextProvide } from "./cases/auth/contexts/auth.context";
 import { OrdersPage } from "./pages/orders.page";
 import { FavoriteProvider } from "./cases/favorites/contexts/favorite-context";
 import FavoritesPage from "./pages/favorites.page";
+import { RatingProvider } from "./cases/ratings/contexts/rating-context";
 
 
 
@@ -25,6 +26,7 @@ import FavoritesPage from "./pages/favorites.page";
 function App() {
   return (
     <AuthContextProvide>
+      <RatingProvider>
       <FavoriteProvider>
         <SearchProvider>
           <CartContextProvider>
@@ -46,6 +48,7 @@ function App() {
           </CartContextProvider>
         </SearchProvider>
       </FavoriteProvider>
+      </RatingProvider>
     </AuthContextProvide>
   );
 }
