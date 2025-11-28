@@ -3,6 +3,7 @@ import { useAuth } from "@/cases/auth/hooks/use-auth";
 import { OrderContent } from "@/cases/order/components/order-content";
 import { useOrders } from "@/cases/order/hooks/use-order";
 
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { OrdersEmpty } from "@/cases/order/components/order-empty";
 
 export function OrdersPage() {
   const { user } = useAuth();
@@ -25,7 +27,7 @@ export function OrdersPage() {
       localStorage.setItem("purchasedProducts", JSON.stringify(uniqueIds));
     }
   }, [isLoading, orders]);
-  
+
   return (
     <div className="min-h-screen bg-zinc-50">
       <div className="max-w-6xl mx-auto px-6 py-10">
@@ -49,13 +51,23 @@ export function OrdersPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {!isLoading && orders?.map(order => (
-          <div key={order.id} className="mb-6">
-            <OrderContent order={order} />
-          </div>
-        ))}
+        <h1 className="text-4xl font-extrabold text-blue-500 mb-8">
+          Meus Pedidos
+        </h1>
+
+        {isLoading ? (
+          <p className="text-center text-lg text-gray-500">Carregando pedidos...</p>
+        ) : orders && orders.length > 0 ? (
+          orders.map(order => (
+            <div key={order.id} className="mb-6">
+              <OrderContent order={order} />
+            </div>
+          ))
+        ) : (
+          <OrdersEmpty />
+        )}
 
       </div>
     </div>
-  )
+  );
 }

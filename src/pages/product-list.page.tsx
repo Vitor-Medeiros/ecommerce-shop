@@ -25,7 +25,7 @@ export function ProductListPage() {
     .filter((p) => (categoryId ? String(p.category?.id) === String(categoryId) : true));
 
   return (
-    <>
+      <>
       <div className="pt-16">
         <SidebarProvider>
           <div className="flex min-h-screen">
@@ -36,8 +36,13 @@ export function ProductListPage() {
             </Sidebar>
 
           </div>
-
+            
           <section className="container mx-auto py-10">
+
+            <h1 className="text-4xl font-extrabold text-blue-500 mb-8">
+              Catálogo de Produtos
+            </h1>
+
             <div
               className="grid gap-10"
               style={{

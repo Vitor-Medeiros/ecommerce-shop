@@ -36,22 +36,22 @@ export function CartPage() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <h1 className="text-4xl font-extrabold text-zinc-900 mb-8">
+        <h1 className="text-4xl font-extrabold text-blue-500 mb-8">
           Meu Carrinho
         </h1>
 
-        <div className="bg-white rounded-3xl shadow-lg p-8">
+       
           {cart.items.length > 0 ? (
             <CartContent />
           ) : (
-            <div className="flex flex-col items-center justify-center py-20">
+            <div className="flex flex-col items-center justify-center">
               <CartEmpty />
               <p className="mt-6 text-zinc-500">
                 Seu carrinho está vazio. Que tal adicionar alguns produtos?
               </p>
             </div>
           )}
-        </div>
+        
       </div>
     </div>
   );
