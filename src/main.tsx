@@ -16,6 +16,6 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </CartContextProvider>
       </QueryClientProvider>
-    </BrowserRouter>,
+    </BrowserRouter>
   </AuthContextProvide>
 )

@@ -14,30 +14,38 @@ import { CartPage } from "./pages/cart.page";
 import { PrivateRoute } from "./components/routes/private-router";
 import { AuthContextProvide } from "./cases/auth/contexts/auth.context";
 import { OrdersPage } from "./pages/orders.page";
+import { FavoriteProvider } from "./cases/favorites/contexts/favorite-context";
+import FavoritesPage from "./pages/favorites.page";
+
+
 
 
 
 
 function App() {
   return (
-<AuthContextProvide>
-  <SearchProvider>
-    <CartContextProvider>
-      <OrderProvider>
-        <Layout>
-            <Routes>
-              <Route path="/" element={<ProductListPage />} />
-              <Route path="/signin" element={<SignInPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/category/:id" element={<ProductListPage />} />
-              <Route path="/product/:id" element={<ProductDetailPage />} />
-              <Route path="/cart" element={ <CartPage /> } />
-              <Route path="/orders" element={ <PrivateRoute> <OrdersPage /> </PrivateRoute>}/>
-            </Routes>
-          </Layout>
-        </OrderProvider>
-      </CartContextProvider>
-    </SearchProvider>
+    <AuthContextProvide>
+      <FavoriteProvider>
+        <SearchProvider>
+          <CartContextProvider>
+            <OrderProvider>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<ProductListPage />} />
+                  <Route path="/signin" element={<SignInPage />} />
+                  <Route path="/signup" element={<SignUpPage />} />
+                  <Route path="/category/:id" element={<ProductListPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/orders" element={<PrivateRoute> <OrdersPage /> </PrivateRoute>} />
+                  <Route path="/favorites" element={<PrivateRoute> <FavoritesPage /> </PrivateRoute>} />
+                  
+                </Routes>
+              </Layout>
+            </OrderProvider>
+          </CartContextProvider>
+        </SearchProvider>
+      </FavoriteProvider>
     </AuthContextProvide>
   );
 }

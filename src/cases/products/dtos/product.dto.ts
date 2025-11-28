@@ -15,7 +15,7 @@ export interface ProductDTO {
   id?: string;
   name: string;
   description?: string;
-  price: number;
+  price?: number;
   active: boolean;
   category: CategoryDTO;
   brand?: BrandDTO;

@@ -23,14 +23,17 @@ export function Header() {
 
   return (
     <header className="fixed top-0 left-0 w-full border-b bg-white shadow-sm z-50 h-16">
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between py-4 gap-4 h-full">
+     <div className="flex flex-col md:flex-row items-center justify-between py-4 gap-4 h-full px-4 md:px-6">
+
+
         
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center justify-start gap-2">
           <ShoppingBasket className="text-blue-600 w-7 h-7" />
           <h1 className="text-2xl font-bold text-zinc-900 hover:text-blue-600 transition">
             SportsShop
           </h1>
         </Link>
+
 
         <div className="flex-1 px-0 md:px-10 w-full max-w-xl">
           <Input
@@ -69,13 +72,11 @@ export function Header() {
                 <div className="px-4 py-2 text-zinc-700 font-medium border-b">
                   Olá, {user?.name}
                 </div>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
-                  Perfil
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={() => navigate("/orders")}>
                   Meus Pedidos
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/")}>
+                <DropdownMenuItem onClick={() => navigate("/favorites")}>
                   Favoritos
                 </DropdownMenuItem>
                 <DropdownMenuItem

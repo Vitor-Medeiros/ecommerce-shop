@@ -4,17 +4,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormattedNumber, IntlProvider } from "react-intl";
 import { useCart } from "@/cases/cart/hooks/use-cart";
-
+import { FavoriteButton } from "@/cases/favorites/components/favorite-button";
 
 type ProductDetailProps = {
   product: ProductDTO;
 };
-export function ProductDetail({
-  product
-}: ProductDetailProps) {
 
-  const {addProduct} = useCart();
-
+export function ProductDetail({ product }: ProductDetailProps) {
+  const { addProduct } = useCart();
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
   const [selectedPhoto, setSelectedPhoto] = useState<number>(0);
 
@@ -22,34 +19,25 @@ export function ProductDetail({
   const mainPhoto = photos[selectedPhoto];
   const mainImagePhoto = mainPhoto
     ? `${bucketBaseURL}${mainPhoto.path}`
-    : `https://placehold.co/300x300?text=Sem+Imagem&font-roboto`
-
-  
+    : `https://placehold.co/300x300?text=Sem+Imagem&font-roboto`;
 
   function handleAddToCart() {
-   addProduct(product)
+    addProduct(product);
   }
-
 
   return (
     <div className="flex flex-col gap-8 max-w-6xl mx-auto px-4 py-6">
-
-
       <h1 className="text-3xl md:text-4xl font-semibold">{product.name}</h1>
 
-
       <div className="flex flex-col md:flex-row gap-12">
-
-
         <div className="flex flex-col items-center gap-4 w-full md:w-1/2">
-
           <div className="w-full h-[420px] bg-white rounded-xl shadow-md flex items-center justify-center p-4">
             <img
               src={mainImagePhoto}
               className="max-h-full max-w-full object-contain"
+              alt={product.name}
             />
           </div>
-
 
           {photos.length > 1 && (
             <ul className="flex gap-3 overflow-x-auto pb-2">
@@ -67,6 +55,7 @@ export function ProductDetail({
                     <img
                       src={`${bucketBaseURL}${photo.path}`}
                       className="w-full h-full object-contain"
+                      alt={`Foto ${index + 1}`}
                     />
                   </button>
                 </li>
@@ -75,33 +64,29 @@ export function ProductDetail({
           )}
         </div>
 
-
         <div className="flex flex-col gap-6 w-full md:w-1/2 bg-white rounded-xl shadow-lg p-6">
+
+          <p className="text-sm text-gray-500 font-medium">
+            {product.brand?.name ?? "Marca não informada"}
+          </p>
+
 
           <p className="text-gray-500 line-through text-lg">
             <IntlProvider locale="pt-BR">
-              <FormattedNumber
-                value={product.price * 1.15}
-                style="currency"
-                currency="BRL"
-              />
+              <FormattedNumber value={product.price! * 1.15} style="currency" currency="BRL" />
             </IntlProvider>
           </p>
 
           <p className="text-2xl font-bold text-green-600">
             <span className="bg-green-100 px-3 py-1 rounded-lg">
-              {`${Math.floor((1 - (product.price * 0.9) / (product.price * 1.15)) * 100)}% OFF no Pix`}
+              {`${Math.floor((1 - (product.price! * 0.9) / (product.price! * 1.15)) * 100)}% OFF no Pix`}
             </span>
           </p>
 
           <p className="text-lg">
             <span className="text-4xl font-bold text-blue-600">
               <IntlProvider locale="pt-BR">
-                <FormattedNumber
-                  value={product.price * 0.9}
-                  style="currency"
-                  currency="BRL"
-                />
+                <FormattedNumber value={product.price! * 0.9} style="currency" currency="BRL" />
               </IntlProvider>
             </span>{" "}
             <span className="text-gray-700">no Pix</span>
@@ -110,26 +95,15 @@ export function ProductDetail({
           <div className="font-light mb-4 text-gray-700">
             <IntlProvider locale="pt-BR">
               <p>
-                ou{" "}
-                <FormattedNumber
-                  value={product.price}
-                  style="currency"
-                  currency="BRL"
-                />{" "}
-                em 10x
+                ou <FormattedNumber value={product.price!} style="currency" currency="BRL" /> em 10x
               </p>
-
               <p>
-                de{" "}
-                <FormattedNumber
-                  value={product.price / 10}
-                  style="currency"
-                  currency="BRL"
-                />{" "}
-                sem juros
+                de <FormattedNumber value={product.price! / 10} style="currency" currency="BRL" /> sem juros
               </p>
             </IntlProvider>
           </div>
+          
+          <FavoriteButton product={product} className="self-end" />
 
           <Button
             onClick={handleAddToCart}
@@ -139,13 +113,10 @@ export function ProductDetail({
           </Button>
         </div>
       </div>
-
       <div className="bg-white shadow-md rounded-xl p-6 mt-4">
         <h2 className="text-xl font-semibold mb-2">Descrição</h2>
         <p className="text-gray-700 leading-relaxed">{product.description}</p>
       </div>
-
     </div>
   );
-
 }
