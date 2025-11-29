@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useState, useEffect, type ReactNode,  } from "react";
 import type { ProductDTO } from "@/cases/products/dtos/product.dto";
 import { FavoriteService } from "../services/favorite.service";
@@ -23,9 +21,9 @@ export function FavoriteProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return;
 
     try {
-      const favoriteOrders = await FavoriteService.list(user.id);
-      if (favoriteOrders.length > 0) {
-        const items = favoriteOrders[0].items.map((item) => item.product);
+      const favorite = await FavoriteService.list(user.id);
+      if (favorite.length > 0) {
+        const items = favorite[0].items.map((item) => item.product);
         setFavorites(items);
       } else {
         setFavorites([]);
