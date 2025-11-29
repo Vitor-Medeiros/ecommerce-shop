@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ProductDTO } from "../dtos/product.dto";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -13,23 +13,25 @@ type ProductDetailProps = {
   product: ProductDTO;
 };
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ 
+  product }: ProductDetailProps) {
   const { addProduct } = useCart();
   const { user } = useAuth();
   const { data: orders } = useOrders(user?.id);
 
   const bucketBaseURL = import.meta.env.VITE_BUCKET_BASE_URL;
+   const [selectedPhoto, setSelectedPhoto] = useState<number>(0);
   const photos = product.photos || [];
-  const mainPhoto = photos[0] ?? null;
-  const mainImagePhoto = mainPhoto ? `${bucketBaseURL}${mainPhoto.path}` : `https://placehold.co/300x300?text=Sem+Imagem`;
+  const mainPhoto = photos[selectedPhoto];
+   const mainImagePhoto = mainPhoto 
+        ? `${bucketBaseURL}${mainPhoto.path}`
+        : `https://placehold.co/300x300?text=Sem+Imagem&font-roboto`
 
-  // derive purchased ids from orders (preferred)
   const purchasedIdsFromOrders = useMemo(() => {
     if (!orders) return [];
     return orders.flatMap(o => o.items.map(i => String(i.product.id)));
   }, [orders]);
 
-  // fallback to localStorage (kept for backwards compat)
   const purchasedIdsFromStorage = (() => {
     try {
       if (!user) return [];
@@ -39,8 +41,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
       return [];
     }
   })();
-
-  // final check: if either source contains the id -> allow rating
   const hasPurchased = purchasedIdsFromOrders.includes(String(product.id)) || purchasedIdsFromStorage.includes(String(product.id));
 
   function handleAddToCart() {
@@ -52,23 +52,36 @@ export function ProductDetail({ product }: ProductDetailProps) {
       <h1 className="text-3xl md:text-4xl font-semibold">{product.name}</h1>
       <div className="flex flex-col md:flex-row gap-12">
         <div className="flex flex-col items-center gap-4 w-full md:w-1/2">
-          <div className="w-full h-[420px] bg-white rounded-xl shadow-md flex items-center justify-center p-4">
-            <img src={mainImagePhoto} className="max-h-full max-w-full object-contain" alt={product.name} />
-          </div>
-          {photos.length > 1 && (
-            <ul className="flex gap-3 overflow-x-auto pb-2">
-              {photos.map((photo, index) => (
-                <li key={photo.id}>
-                  <button
-                    className={cn("w-20 h-20 rounded-lg border shadow-sm overflow-hidden hover:ring-2 hover:ring-blue-400", index === 0 ? "border-blue-500 ring-2 ring-blue-400" : "border-gray-300")}
-                    onClick={() => {}}
-                  >
-                    <img src={`${bucketBaseURL}${photo.path}`} className="w-full h-full object-contain" alt="" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+           <div className="w-full h-[420px] bg-white rounded-xl shadow-md flex items-center justify-center p-4">
+          <img
+            src={mainImagePhoto}
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+
+
+        {photos.length > 1 && (
+          <ul className="flex gap-3 overflow-x-auto pb-2">
+            {photos.map((photo, index) => (
+              <li key={photo.id}>
+                <button
+                  className={cn(
+                    "w-20 h-20 rounded-lg border shadow-sm overflow-hidden hover:ring-2 hover:ring-blue-400",
+                    index === selectedPhoto
+                      ? "border-blue-500 ring-2 ring-blue-400"
+                      : "border-gray-300"
+                  )}
+                  onClick={() => setSelectedPhoto(index)}
+                >
+                  <img
+                    src={`${bucketBaseURL}${photo.path}`}
+                    className="w-full h-full object-contain"
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         </div>
 
         <div className="flex flex-col gap-6 w-full md:w-1/2 bg-white rounded-xl shadow-lg p-6">
